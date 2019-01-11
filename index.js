@@ -41,7 +41,7 @@ io.sockets.on('connection', socket => {
   });
 
   socket.on('update', (data) => {
-    for (let i = 0; i < blobs.length - 1; i++) {
+    for (let i = 0; i < blobs.length; i++) {
       if (socket.id == blobs[i].id) {
         blobs[i].x = data.x
         blobs[i].y = data.y
