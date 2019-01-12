@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 
 io.sockets.on('connection', socket => {
 
-  console.log("New client:", socket.id)
+  console.log("> [LOG] New client:", socket.id)
 
   // Emit new connection
   socket.emit('new_connection');
@@ -60,11 +60,11 @@ io.sockets.on('connection', socket => {
       }
     }
 
-    console.log("Client", socket.id, "disconnected by:", reason)
+    console.log("> [LOG] Client", socket.id, "disconnected by:", reason)
   });
 
 });
 
 http.listen(4000, () => {
-  console.log('> [LOG] Listening on port', 400);
+  console.log('> [LOG] Listening on port', 4000);
 });
