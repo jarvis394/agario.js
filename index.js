@@ -3,7 +3,7 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
-setInterval(() => heartbeat(), 10)
+setInterval(() => heartbeat(), 1)
 
 function heartbeat() {
   io.sockets.emit("heartbeat", blobs)

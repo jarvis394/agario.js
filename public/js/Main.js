@@ -101,13 +101,13 @@ function draw() {
       stroke(player.border_color)
       strokeWeight(4)
       ellipse(player.x, player.y, player.r * 2)
+
+      textAlign(CENTER)
+      textSize(12)
+      fill(0)
+      noStroke()
+      text(player.id, player.x, player.y - player.r * 2 + 8)
     }
-    
-    textAlign(CENTER)
-    textSize(12)
-    fill(0)
-    noStroke()
-    text(player.id, player.x, player.y - player.r * 2 + 8)
   })
 
   // Draw UI overlay
@@ -135,7 +135,7 @@ socket.on("heartbeat", (blobs) => {
     y: player.pos.y,
     r: player.radius
   })
-  
+
   players = blobs
 })
 
