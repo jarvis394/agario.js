@@ -2,24 +2,26 @@ let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
 
 const PLAYER_RADIUS = 32
+const FIELD_SIZE = 500
+const GRID_SIZE = 40
 
-BLOB_RADIUS = 5,
-  BLOBS_COUNT = w / 1.25,
+const BLOB_RADIUS = 5
+const BLOBS_COUNT = FIELD_SIZE / 1.25
 
-  FIELD_SIZE = 2000,
-  GRID_SIZE = 40
-
+let players = {}
 let player
 let ui
 let grid
 let blobs = []
-let players = []
-let paused = false
+let paused = true
+let gameStarted = false
 let fillCounter = 0
 
 let zoom = 1
 
-// Create socket and connect
+let font
+
+// Create socket and conect
 let socket = io()
 
 function setup() {
@@ -29,38 +31,34 @@ function setup() {
   // Create blobs
   for (let n = 0; n < BLOBS_COUNT; n++) {
     blobs.push(new Blob())
+
+    // Whem user is not connected, then draw a field's blobs
+    blobs[n].draw()
   }
-
-  // Create player
-  player = new Player()
-
-  // Say that we're connected
-  socket.emit("start", {
-    x: player.pos.x,
-    y: player.pos.y,
-    r: player.radius,
-    body_color: player.COLOR,
-    border_color: player.BORDER_COLOR
-  })
-
-  // Make shape of player's circle
-  player.makePoints()
 
   // Create UI overlay
   ui = new UI()
 
   // Create grid
   grid = new Grid(GRID_SIZE)
+
+  // Whem user is not connected, then draw a field's grid
+  grid.draw()
+
+  // Load font
+  font = loadFont("../fonts/Pencil.ttf")
 }
 
 function draw() {
   if (paused && fillCounter == 0) {
     noStroke()
-    fill(0, 0, 0, 100)
+    fill(0, 0, 0, 150)
     fillCounter++
     return rect(0, 0, w, h)
   } else if (paused) return
   else fillCounter = 0
+
+  if (!players[socket.id]) return ui.loading()
 
   // Clear previous canvas
   clear()
@@ -68,12 +66,12 @@ function draw() {
   // Move view to the center
   translate(w / 2, h / 2)
 
-  let newZoom = w / (player.radius * 25)
+  let newZoom = w / (players[socket.id].radius * 25)
   if (newZoom < 0.7) newZoom = 0.7
   zoom = lerp(zoom, newZoom, 0.1)
 
   scale(zoom)
-  translate(-player.pos.x, -player.pos.y)
+  translate(-players[socket.id].pos.x, -players[socket.id].pos.y)
 
   // Draw grid
   grid.draw()
@@ -82,8 +80,9 @@ function draw() {
   for (let i = blobs.length - 1; i >= 0; i--) {
     if (blobs[i]) blobs[i].draw()
 
-    if (player.eats(blobs[i])) {
+    if (players[socket.id].eats(blobs[i])) {
       blobs.splice(i, 1)
+      socket.emit("eatBlob", i)
     }
   }
 
@@ -92,64 +91,51 @@ function draw() {
   noFill()
   rect(-FIELD_SIZE, -FIELD_SIZE, FIELD_SIZE * 3, FIELD_SIZE * 3)
 
-  // Draw player (crossline) PLAYERS
-  player.draw()
-
-  players.forEach(player => {
-    if (socket.id !== player.id) {
-      fill(player.body_color)
-      stroke(player.border_color)
-      strokeWeight(4)
-      ellipse(player.x, player.y, player.r * 2)
-
-      textAlign(CENTER)
-      textSize(12)
-      fill(0)
-      noStroke()
-      text(player.id, player.x, player.y - player.r * 2 + 8)
-    }
-  })
-
   // Draw UI overlay
   ui.draw()
 
-  // And then move player (FIXED: text goes on previous position of player)
-  player.move()
+  // Draw players
+  for (let id in players) {
+    // Draw player
+    players[id].draw()
+
+    // Oh... that's me?
+    if (id === socket.id) {
+      // Move yourself
+      players[id].move()
+
+      // Update our location
+      socket.emit("update", {
+        x: players[id].pos.x,
+        y: players[id].pos.y,
+        r: players[id].radius
+      })
+    }
+  }
 }
 
 function windowResized() {
   w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
   h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
 
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight)
 }
 
 function keyPressed() {
-  if (keyCode === 27) paused = !paused
+  if (gameStarted && keyCode === 27) paused = !paused
 }
 
-socket.on("heartbeat", (blobs) => {
-  // Update our location
-  socket.emit("update", {
-    x: player.pos.x,
-    y: player.pos.y,
-    r: player.radius
-  })
+// setInterval(() => {
+//   if (blobs.length < BLOBS_COUNT)
+//     blobs.push(new Blob())
+// }, 100)
 
-  players = blobs
-})
-
-setInterval(() => {
-  if (blobs.length < BLOBS_COUNT)
-    blobs.push(new Blob())
-}, 100)
-
-setInterval(() => {
-  blobs.push(new Blob())
-}, 1500)
+// setInterval(() => {
+//   blobs.push(new Blob())
+// }, 1500)
 
 /**
- * Create random bright contrast color for player
+ * Create random bright contrast color
  * @function
  */
 const randomColor = () => {

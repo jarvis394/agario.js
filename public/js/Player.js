@@ -4,17 +4,25 @@
  */
 class Player {
 
-  constructor() {
+  constructor(nick, id, color, bcolor, x, y) {
     this.radius = PLAYER_RADIUS
-    this.pos = createVector(random(w), random(h))
+
+    if (x && y) {
+      this.pos = createVector(x, y)
+    } else {
+      this.pos = createVector(random(w), random(h))
+    }
+
     this.velocity = createVector(0, 0)
-    this.mass = PI * this.radius * this.radius;
+    this.mass = PI * this.radius * this.radius
     this.speed = 30 * Math.pow(this.mass, -0.2)
     this.points = []
 
-    let color = randomColor()
-    this.COLOR = color.body
-    this.BORDER_COLOR = color.border
+    this.nick = nick
+    this.id = id
+
+    this.COLOR = color
+    this.BORDER_COLOR = bcolor
   }
 
   makePoints() {
@@ -49,6 +57,14 @@ class Player {
       vertex(p.x, p.y)
     })
     endShape(CLOSE)
+
+    textAlign(CENTER, CENTER)
+    fill(255)
+    stroke(0)
+    strokeWeight(1)
+    textFont(font)
+    textSize(48)
+    text(this.nick, this.pos.x, this.pos.y)
   }
 
   /**

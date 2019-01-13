@@ -17,9 +17,17 @@
   <script src="js/UI.js"></script>
   <script src="js/Grid.js"></script>
   <script src="js/Main.js"></script>
+  <script src="js/Socket.js"></script>
 </head>
 
 <body>
+
+  <div class="game-menu" id="menu">
+    <h1 class="game-header">agario.js</h1>
+    <input type="text" placeholder="Nickname" id="nick" required class="name-input" />
+    <button onclick="connectToServer()" class="connect-btn btn">connect</button>
+    <button class="btn">settings</button>
+  </div>
 
 </body>
 
