@@ -23,7 +23,7 @@ const random = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-const FIELD_SIZE = 500
+const FIELD_SIZE = 2000
 const BLOB_RADIUS = 5
 const BLOBS_COUNT = FIELD_SIZE / 1.25
 

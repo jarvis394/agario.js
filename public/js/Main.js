@@ -2,7 +2,7 @@ let w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0)
 let h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
 
 const PLAYER_RADIUS = 32
-const FIELD_SIZE = 500
+const FIELD_SIZE = 2000
 const GRID_SIZE = 40
 
 const BLOB_RADIUS = 5
