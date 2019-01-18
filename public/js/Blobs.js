@@ -4,13 +4,13 @@
  */
 class Blob {
 
-  constructor(x, y, r) {
-    if (x && y && r) {
+  constructor(x, y, r, c) {
+    if (x && y && r && c) {
       this.pos = createVector(x, y)
       this.radius = floor(r)
-      this.color = randomColor().body
+      this.color = c
     } else {
-      this.pos = createVector(random(-FIELD_SIZE, FIELD_SIZE * 2), random(-FIELD_SIZE, FIELD_SIZE * 2))
+      this.pos = createVector(random(0, FIELD_SIZE), random(0, FIELD_SIZE))
       this.radius = floor(random(BLOB_RADIUS, BLOB_RADIUS * 1.3))
       this.color = randomColor().body
     }

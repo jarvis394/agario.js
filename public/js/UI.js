@@ -8,13 +8,16 @@ class UI {
 
   draw() {
     push()
+
+    // Draw size of player
     textSize(24)
     textAlign(CENTER)
     textFont(this.font)
     fill(255)
     stroke(0)
     strokeWeight(3)
-    text(floor(players[socket.id].radius * 2), players[socket.id].pos.x, players[socket.id].pos.y - players[socket.id].radius - 16)
+    text(floor(players[socket.id].Radius * 2), players[socket.id].pos.x, players[socket.id].pos.y - players[socket.id].Radius - 16)
+    
     pop()
   }
 

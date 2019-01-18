@@ -6,11 +6,12 @@ class Player {
 
   constructor(nick, id, color, bcolor, x, y) {
     this.radius = PLAYER_RADIUS
+    this.Radius = PLAYER_RADIUS / 2
 
     if (x && y) {
       this.pos = createVector(x, y)
     } else {
-      this.pos = createVector(random(w), random(h))
+      this.pos = createVector(random(0, FIELD_SIZE), random(0, FIELD_SIZE))
     }
 
     this.velocity = createVector(0, 0)
@@ -20,25 +21,28 @@ class Player {
 
     this.nick = nick
     this.id = id
+    this.block = []
 
     this.COLOR = color
     this.BORDER_COLOR = bcolor
   }
 
   makePoints() {
+    this.Radius = lerp(this.Radius, this.radius, 0.1)
+
     this.points = []
-    for (let i = 0; i < this.radius; i++) {
-      let angle = map(i, 0, this.radius, 0, TWO_PI)
-      let x = this.radius * cos(angle) + this.pos.x
-      let y = this.radius * sin(angle) + this.pos.y
+    for (let i = 0; i < this.Radius; i++) {
+      let angle = map(i, 0, this.Radius, 0, TWO_PI)
+      let x = this.Radius * cos(angle) + this.pos.x
+      let y = this.Radius * sin(angle) + this.pos.y
 
       this.points.push({
         x: x,
         y: y
       })
 
-      this.points[i].x = constrain(this.points[i].x, -FIELD_SIZE, FIELD_SIZE * 2)
-      this.points[i].y = constrain(this.points[i].y, -FIELD_SIZE, FIELD_SIZE * 2)
+      this.points[i].x = constrain(this.points[i].x, 5, FIELD_SIZE - 5)
+      this.points[i].y = constrain(this.points[i].y, 5, FIELD_SIZE - 5)
     }
   }
 
@@ -63,7 +67,7 @@ class Player {
     stroke(0)
     strokeWeight(1)
     textFont(font)
-    textSize(48)
+    textSize(this.Radius / 1.5)
     text(this.nick, this.pos.x, this.pos.y)
   }
 
@@ -81,8 +85,8 @@ class Player {
 
     this.velocity.lerp(newVelocity, 0.1)
 
-    this.pos.x = constrain(this.pos.x, -FIELD_SIZE, FIELD_SIZE * 2)
-    this.pos.y = constrain(this.pos.y, -FIELD_SIZE, FIELD_SIZE * 2)
+    this.pos.x = constrain(this.pos.x, 5, FIELD_SIZE - 5)
+    this.pos.y = constrain(this.pos.y, 5, FIELD_SIZE - 5)
 
     this.pos.add(this.velocity)
   }

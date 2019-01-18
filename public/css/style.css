@@ -70,3 +70,13 @@ body {
   padding-left: 6px;
   outline: 0 !important;
 }
+
+.players {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+
+.players h3 {
+  margin: 0;
+}
