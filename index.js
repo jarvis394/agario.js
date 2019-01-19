@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 })
 
 // Listen on port
-http.listen(4000, () => {
+http.listen(process.env.PORT || 4000, () => {
   console.log('> [SERVER] Listening on port'.yellow, "4000".white);
 });
 
