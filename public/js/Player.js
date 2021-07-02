@@ -25,14 +25,21 @@ class Player {
 
     this.COLOR = color
     this.BORDER_COLOR = bcolor
+    
+    this.angle = Math.random() * TWO_PI
   }
 
+  /**
+   * Create points for player's shape
+   * @function
+   */
   makePoints() {
     this.Radius = lerp(this.Radius, this.radius, 0.1)
 
     this.points = []
-    for (let i = 0; i < this.Radius; i++) {
-      let angle = map(i, 0, this.Radius, 0, TWO_PI)
+    
+    for (let i = 0; i <= 360; i++) { 
+      let angle = map(i, 0, 360, 0, TWO_PI)
       let x = this.Radius * cos(angle) + this.pos.x
       let y = this.Radius * sin(angle) + this.pos.y
 
@@ -58,7 +65,7 @@ class Player {
     beginShape()
     this.makePoints()
     this.points.forEach(p => {
-      vertex(p.x, p.y)
+      curveVertex(p.x, p.y)
     })
     endShape(CLOSE)
 
@@ -92,13 +99,15 @@ class Player {
   }
 
   /**
-   * Returns true
+   * Returns true if player eats another blob
    * @param {object} blob Blob object
    */
   eats(blob) {
     let d = p5.Vector.dist(this.pos, blob.pos)
-
-    if (d < this.radius + blob.radius) {
+    
+    if (d < this.radius - blob.radius * 0.5 && this.radius > blob.radius) {
+      if (this.radius < blob.radius + 8) return
+      
       // A sum of 2 circles' area
       let sum = PI * this.radius * this.radius + PI * blob.radius * blob.radius * 6
 

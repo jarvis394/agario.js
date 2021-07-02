@@ -80,3 +80,15 @@ body {
 .players h3 {
   margin: 0;
 }
+
+.pause {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.pause span {
+  margin-left: 3px;
+  margin-right: 3px;
+  background: black;
+}

@@ -30,21 +30,17 @@ const Block = require("./lib/Block")
 
 setInterval(() => heartbeat(), 1)
 setInterval(() => {
-  field.forEach((blocks, i) => {
-    blocks.forEach((block, j) => {
-      if (block.blobs.length > BLOBS_COUNT) return
-      block.blobs.push(new Blob())
-      io.sockets.emit("newBlob", {
-        block: [i, j],
-        blob: block.blobs[block.blobs.length - 1]
-      })
-    })
+  if (blobs.length > BLOBS_COUNT) return
+  blobs.push(new Blob())
+  io.sockets.emit("newBlob", {
+    blob: blobs[blobs.length - 1]
   })
 }, 1000)
 
 // Connected players
 let players = {}
 
+// Blobs
 let blobs = []
 
 // Field with blocks filled with sertain amount of blobs
@@ -55,8 +51,12 @@ for (let i = 0; i < BLOCKS_COUNT; i++) {
   field.push([])
   for (let j = 0; j < BLOCKS_COUNT; j++) {
     field[i].push(new Block(i, j))
-    field[i][j].createBlobs()
   }
+}
+
+// Create blobs
+for (let i = 0; i < BLOBS_COUNT; i++) {
+  blobs.push(new Blob())
 }
 
 // Handle socket
@@ -73,7 +73,7 @@ app.get('/', (req, res) => {
 })
 
 // Listen on port
-http.listen(process.env.PORT || 4000, () => {
+http.listen(4000, () => {
   console.log('> [SERVER] Listening on port'.yellow, "4000".white);
 });
 
