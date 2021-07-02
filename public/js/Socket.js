@@ -19,6 +19,19 @@ function connectToServer() {
 
 }
 
+socket.on("blobs", data => {
+  
+  // Flush blobs
+  blobs = []
+
+  // Create blobs
+  for (let i = 0; i < data.blobs.length; i++) {
+    blobs.push(new Blob(data.blobs[i].x, data.blobs[i].y, data.blobs[i].r, data.blobs[i].c))
+  }
+  
+  document.getElementById("menu").style.display = "flex"
+})
+
 socket.on("start", (data) => {
 
   // Create players
@@ -45,21 +58,7 @@ socket.on("start", (data) => {
 
 })
 
-socket.on("update_blobs", (data) => {
-
-  // Flush blobs
-  blobs = []
-
-  // Create blobs
-  for (let i = 0; i < data.length; i++) {
-    if (data[i]) blobs.push(new Blob(data[i].x, data[i].y, data[i].r, data[i].c))
-  }
-
-})
-
 socket.on("heartbeat", (data) => {
-
-  if (!gameStarted) return
 
   // Update positions and radiuses
   for (let id in data.players) {
@@ -84,24 +83,24 @@ socket.on("newPlayer", (data) => {
 
 })
 
-socket.on("removePlayer", (id) => {
+socket.on("removePlayer", (data) => {
   // Delete player
-  delete players[id]
+  delete players[data.id]
+  
+  console.log("Delete player:", data.id, "- data:", data)
+  
+  if (data.id == socket.id) {
+    gameStarted = false
+    paused = true
+    document.getElementById("playersStats").style.display = "none"
+    document.getElementById("menu").style.display = "flex"
+  }
 
   // Update players stats
   document.getElementById("playersStats").innerHTML = "<h3>Players: " + Object.keys(players).length + "</h3>"
 })
 
 socket.on("removeBlob", (data) => {
-  let blocks = []
-
-  for (let j = 0; j < BLOCKS_COUNT; j++) {
-    blocks.push([])
-    for (let i = 0; i < BLOBS_COUNT; i++) {
-      blocks[j].push(blobs[i + j * BLOBS_COUNT])
-    }
-  }
-
   // Delete blob
   if (data.id !== socket.id) blobs.splice(data.i, 1)
 })

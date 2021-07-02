@@ -4,8 +4,8 @@
  */
 class Blob {
 
-  constructor(x, y, r, c) {
-    if (x && y && r && c) {
+  constructor(x, y, r, c, id) {
+    if (x && y) {
       this.pos = createVector(x, y)
       this.radius = floor(r)
       this.color = c

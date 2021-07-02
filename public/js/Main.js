@@ -5,10 +5,10 @@ const PLAYER_RADIUS = 16
 const FIELD_SIZE = 10000
 const GRID_SIZE = 40
 
-const BLOCKS_COUNT = Math.ceil(FIELD_SIZE / 1000)
+const BLOCKS_COUNT = Math.ceil(FIELD_SIZE / 10)
 const BLOCKS_SIZE = FIELD_SIZE / BLOCKS_COUNT
 
-const BLOBS_COUNT = BLOCKS_SIZE / 25
+const BLOBS_COUNT = FIELD_SIZE / 1.25
 const BLOB_RADIUS = 5
 
 let players = {}
@@ -18,8 +18,7 @@ let blobs = []
 let allBlobs = []
 let paused = true
 let gameStarted = false
-let fillCounter = 0
-// let mapCanvas
+let c = 0
 
 let zoom = 1
 
@@ -31,17 +30,6 @@ let socket = io()
 function setup() {
   // Create canvas (obvious)
   createCanvas(w, h)
-  
-  // Create canvas for map
-  // mapCanvas = createGraphics(FIELD_SIZE / 10, FIELD_SIZE / 10)
-
-  // Create blobs
-  for (let n = 0; n < BLOBS_COUNT; n++) {
-    blobs.push(new Blob())
-
-    // Whem user is not connected, then draw a field's blobs
-    blobs[n].draw()
-  }
 
   // Create UI overlay
   ui = new UI()
@@ -57,43 +45,59 @@ function setup() {
 }
 
 function draw() {
-  if (paused && fillCounter == 0) {
+  if (!gameStarted) {
+    clear()
+    
+    grid.draw()
+    
+    for (let n = 0; n < BLOBS_COUNT; n++) {
+      if (blobs[n]) blobs[n].draw()
+    }
+    
+    for (let id in players) {
+      players[id].draw()
+    }
+    
+    fill(0, 0, 0, 120)
     noStroke()
-    fill(0, 0, 0, 150)
-    fillCounter++
-    return rect(0, 0, w, h)
-  } else if (paused) {
+    rect(0, 0, w, h)
+    
     return
-  }
-  else {
-    fillCounter = 0
   }
 
   if (!players[socket.id]) return ui.loading()
-
+  
   // Clear previous canvas
   clear()
 
   // Move view to the center
   translate(w / 2, h / 2)
 
-  let newZoom = sqrt(w / (players[socket.id].radius * 8))
+  let newZoom = sqrt(h / (players[socket.id].radius * 8))
   if (newZoom < 0.7) newZoom = 0.7
   zoom = lerp(zoom, newZoom, 0.1)
-
+  
   scale(zoom)
   translate(-players[socket.id].pos.x, -players[socket.id].pos.y)
 
   // Draw grid
   grid.draw()
-
+  
   // Draw blobs
   for (let i = blobs.length - 1; i >= 0; i--) {
-    if (blobs[i]) blobs[i].draw()
+    if (!blobs[i] || (
+      blobs[i].pos.x < players[socket.id].pos.x - windowWidth / 2 - (windowWidth / 2) * map(zoom, 0.7, 2, 2, 0.7) ||
+      blobs[i].pos.x > players[socket.id].pos.x + windowWidth / 2 + (windowWidth / 2) * map(zoom, 0.7, 2, 2, 0.7) ||
+      blobs[i].pos.y < players[socket.id].pos.y - windowHeight / 2 - (windowHeight / 2) * map(zoom, 0.7, 2, 2, 0.7) ||
+      blobs[i].pos.y > players[socket.id].pos.y + windowHeight / 2 + (windowHeight / 2) * map(zoom, 0.7, 2, 2, 0.7) 
+      )
+    ) continue
+    
+    blobs[i].draw()
 
     if (players[socket.id].eats(blobs[i])) {
-      blobs.splice(i, 1)
       socket.emit("eatBlob", i)
+      blobs.splice(i, 1)
     }
   }
 
@@ -110,9 +114,15 @@ function draw() {
   for (let id in players) {
     // Draw player
     players[id].draw()
+    
+    // Check collision
+    if (id !== socket.id && players[socket.id].eats(players[id]) && players[id]) {
+      delete players[id]
+      socket.emit("removePlayer", id)
+    }
 
     // Oh... that's me?
-    if (id === socket.id) {
+    if (id === socket.id && !paused && players[socket.id]) {
       // Move yourself
       players[socket.id].move()
 
@@ -124,14 +134,6 @@ function draw() {
       })
     }
   }
-  
-//   // Draw map
-//   mapCanvas.fill(0)
-//   mapCanvas.stroke(0)
-//   mapCanvas.strokeWeight(4)
-//   mapCanvas.rect(0, 0, FIELD_SIZE / 2, FIELD_SIZE / 2)
-  
-//   image(mapCanvas, 0, 0, 50, 50);
 }
 
 function windowResized() {
